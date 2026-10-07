@@ -1,0 +1,31 @@
+diff --git a/packages/react-reconciler/src/ReactFiberLane.js b/packages/react-reconciler/src/ReactFiberLane.js
+index 7ec53c0..6dbbe1a 100644
+--- a/packages/react-reconciler/src/ReactFiberLane.js
++++ b/packages/react-reconciler/src/ReactFiberLane.js
+@@ -897,10 +897,24 @@ export function markRootFinished(
+   const previouslyPendingLanes = root.pendingLanes;
+   const noLongerPendingLanes = previouslyPendingLanes & ~remainingLanes;
+ 
++  // A retry lane that is still suspended, wasn't pinged, and wasn't part of
++  // this commit can't have been unblocked by it: any update or ping that could
++  // unblock it goes through markRootUpdated or markRootPinged. Un-suspending it
++  // here would make it render in non-prerender mode, where its boundary
++  // re-suspends and spawns a fresh retry lane. That commit would then
++  // un-suspend the next pending retry lane, and so on forever when two or more
++  // boundaries have outstanding retry lanes.
++  const stillSuspendedRetryLanes =
++    root.suspendedLanes &
++    ~root.pingedLanes &
++    remainingLanes &
++    ~finishedLanes &
++    RetryLanes;
++
+   root.pendingLanes = remainingLanes;
+ 
+-  // Let's try everything again
+-  root.suspendedLanes = NoLanes;
++  // Let's try everything else again
++  root.suspendedLanes = stillSuspendedRetryLanes;
+   root.pingedLanes = NoLanes;
+   root.warmLanes = NoLanes;
+ 

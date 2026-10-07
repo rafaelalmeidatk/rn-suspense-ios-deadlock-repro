@@ -1,0 +1,13 @@
+{
+  "name": "react-retry-loop-node-repro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "repro": "node repro.mjs 2000"
+  },
+  "dependencies": {
+    "jsdom": "26.1.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  }
+}

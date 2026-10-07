@@ -1,0 +1,18 @@
+--- a/node_modules/react-native/Libraries/Renderer/implementations/ReactFabric-dev.js
++++ b/node_modules/react-native/Libraries/Renderer/implementations/ReactFabric-dev.js
+@@ -1521,8 +1521,14 @@
+       suspendedRetryLanes
+     ) {
+       var previouslyPendingLanes = root.pendingLanes;
++      var stillSuspendedRetryLanes =
++        root.suspendedLanes &
++        ~root.pingedLanes &
++        remainingLanes &
++        ~finishedLanes &
++        62914560;
+       root.pendingLanes = remainingLanes;
+-      root.suspendedLanes = 0;
++      root.suspendedLanes = stillSuspendedRetryLanes;
+       root.pingedLanes = 0;
+       root.warmLanes = 0;
+       root.expiredLanes &= remainingLanes;

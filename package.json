@@ -1,0 +1,24 @@
+{
+  "name": "rn-suspense-repro",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "expo": "~57.0.27",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "scheduler": "0.27.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "@types/scheduler": "^0.28.0",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "private": true
+}
