@@ -23,7 +23,9 @@ const BUSY_FOR_MS = 10000;
 const BUSY_TASK_MS = 2;
 
 const stats = {startedAt: 0, resolvedAt: 0, dataRenders: 0, intervalTicks: 0};
-const probes: Array<{id: number, scheduledAt: number, firedAt: ?number}> = [];
+type Probe = {id: number, scheduledAt: number, firedAt: ?number};
+
+const probes: Array<Probe> = [];
 let probeCount = 0;
 let statsInput: ?React.ElementRef<typeof TextInput> = null;
 
@@ -54,7 +56,11 @@ function renderStats() {
 }
 
 function probeTimers() {
-  const probe = {id: ++probeCount, scheduledAt: Date.now(), firedAt: null};
+  const probe: Probe = {
+    id: ++probeCount,
+    scheduledAt: Date.now(),
+    firedAt: null,
+  };
   probes.push(probe);
   if (probes.length > 3) {
     probes.shift();
@@ -66,26 +72,30 @@ function probeTimers() {
   renderStats();
 }
 
-type Resource = Promise<string> & {status?: 'fulfilled', value?: string};
+type Resource = {promise: Promise<string>, value: ?string};
 
 function createResource(): Resource {
-  const promise: Resource = new Promise(resolve =>
-    setTimeout(() => resolve('resolved'), RESOLVE_AFTER_MS),
-  );
-  promise.then(value => {
+  const resource: Resource = {
+    promise: new Promise(resolve =>
+      setTimeout(() => resolve('resolved'), RESOLVE_AFTER_MS),
+    ),
+    value: null,
+  };
+  void resource.promise.then(value => {
     stats.resolvedAt = Date.now();
-    console.log(`RESOLVED at ${sinceStart()} after ${stats.dataRenders} renders`);
-    promise.status = 'fulfilled';
-    promise.value = value;
+    console.log(
+      `RESOLVED at ${sinceStart()} after ${stats.dataRenders} renders`,
+    );
+    resource.value = value;
   });
-  return promise;
+  return resource;
 }
 
 function Data({resource}: {resource: Resource}): React.Node {
   stats.dataRenders++;
-  // Thrown like TanStack Query's useSuspenseQuery; `use(resource)` does not trigger the loop.
-  if (resource.status !== 'fulfilled') {
-    throw resource;
+  // Thrown like TanStack Query's useSuspenseQuery; `use(resource.promise)` does not trigger the loop.
+  if (resource.value == null) {
+    throw resource.promise;
   }
   return <Text style={styles.loaded}>✅ {resource.value}</Text>;
 }
@@ -167,8 +177,8 @@ function Playground(): React.Node {
       <Text style={styles.help}>
         iOS, physical device or simulator. {'\n'}1. Tap "Suspense deadlock",
         don't touch the screen for 10s. Expected: A and B show ✅ after 2s.
-        Actual on iOS: they stay loading, setInterval ticks stay at 0, and
-        Data renders grow by thousands per second (Android resolves at 2s).
+        Actual on iOS: they stay loading, setInterval ticks stay at 0, and Data
+        renders grow by thousands per second (Android resolves at 2s).
         {'\n'}2. Reload, tap "Busy scheduler 10s". Expected: setInterval keeps
         ticking. Actual on iOS: 0 ticks for 10s.{'\n'}Tap the gray box to
         schedule a setTimeout(0) probe.
@@ -184,7 +194,8 @@ function Playground(): React.Node {
       {resource != null && (
         <View key={runId} style={styles.card}>
           <UpdatesOnMount resource={resource} />
-          <Suspense fallback={<Text style={styles.loading}>⏳ B loading…</Text>}>
+          <Suspense
+            fallback={<Text style={styles.loading}>⏳ B loading…</Text>}>
             <Data resource={resource} />
           </Suspense>
         </View>
@@ -217,7 +228,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonText: {color: '#fff', fontWeight: '600'},
-  card: {borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, gap: 8},
+  card: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    gap: 8,
+  },
   loading: {fontSize: 16, color: '#a16207'},
   loaded: {fontSize: 16, color: '#15803d'},
   stats: {backgroundColor: '#f1f5f9', borderRadius: 8, padding: 12},
