@@ -30,7 +30,13 @@ Optional remote logging: run `node log-sink.mjs` (port 4002) and start Metro wit
 
 ## RNTester (React Native `main`)
 
-`rntester/RNTesterPlayground.js` is the same reproduction as an RNTester Playground. Copy it over `packages/rn-tester/js/examples/Playground/RNTesterPlayground.js` in the react-native repo, run RNTester on iOS, and open Playground. The steps are on screen. It has the same logic as the Expo app, which was verified on a physical iPhone, but I couldn't run RNTester itself (no Mac).
+`rntester/RNTesterPlayground.js` is the same reproduction as an RNTester Playground. Copy it over `packages/rn-tester/js/examples/Playground/RNTesterPlayground.js` in the react-native repo, run RNTester, and open Playground (`rntester://example/Playground`). The steps are on screen.
+
+Verified in RNTester built from `main` (`a4c421a`, React 19.3.0) on the Android emulator:
+- Suspense deadlock: the data resolves at 2.0s after about 2,800 renders, i.e. the loop happens (about 6 renders without it).
+- Busy scheduler: 86 interval ticks in 10s.
+
+I couldn't build RNTester for iOS (no Mac). The iOS result above comes from the Expo app, which uses the same logic.
 
 ## The React loop without React Native
 
