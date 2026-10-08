@@ -28,6 +28,10 @@ The stats box and buttons deliberately don't use React state (stats are written 
 
 Optional remote logging: run `node log-sink.mjs` (port 4002) and start Metro with `EXPO_PUBLIC_LOG_SINK_URL=http://<your-LAN-IP>:4002/log`. Console logs also show up in Metro.
 
+## RNTester (React Native `main`)
+
+`rntester/RNTesterPlayground.js` is the same reproduction as an RNTester Playground. Copy it over `packages/rn-tester/js/examples/Playground/RNTesterPlayground.js` in the react-native repo, run RNTester on iOS, and open Playground. The steps are on screen. It has the same logic as the Expo app, which was verified on a physical iPhone, but I couldn't run RNTester itself (no Mac).
+
 ## The React loop without React Native
 
 `node/` reproduces the loop with react-dom, jsdom and the real scheduler; no `act()` is involved:
